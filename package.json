@@ -7,7 +7,7 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "esbuild src/index.js --bundle --platform=node --target=node20 --outfile=dist/index.js --banner:js='#/usr/bin/env /Users/mike/tools/jira-dump/venv/bin/python /Users/mike/.cursor/extensions/ms-python.debugpy-2024.6.0-darwin-x64/bundled/libs/debugpy/adapter/../../debugpy/launcher 55843 -- /Users/mike/tools/jira-dump/analyze_issue_durations.py  node' --minify",
+    "build": "esbuild src/index.js --bundle --platform=node --target=node20 --outfile=dist/index.js --minify",
     "lint": "eslint . --ext .js",
     "format": "prettier --write ."
   },
