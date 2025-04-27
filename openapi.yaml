@@ -1,0 +1,360 @@
+openapi: 3.0.3
+info:
+  title: NetRise ZeroLens API
+  version: "0.1.0"
+  description: |
+    Cloud API for uploading compiled binaries, receiving Common Weakness Enumeration (CWE)
+    findings, and requesting AI-generated analysis.  
+    All requests **must** include an API token in the `X-Authorization` header.  
+    **File-size limit:** 100 MB.  
+    **Supported architectures & CWEs** are documented in the Early-Adopter PDF.  
+    Contact NetRise to enable AI Analysis for your token.
+  contact:
+    name: NetRise Support
+    url: https://kb.netrise.io/zero-lens-early-adopter-testing-documentation
+servers:
+  - url: https://zerolens.netrise.io
+security:
+  - ApiTokenAuth: []
+tags:
+  - name: Binaries
+    description: Upload binaries and query processing status
+  - name: Findings
+    description: Retrieve CWE findings for processed binaries
+  - name: AI Analysis
+    description: Trigger and fetch AI-generated analysis
+
+components:
+  securitySchemes:
+    ApiTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Authorization
+      description: >
+        Early-Adopter token supplied by NetRise. Tokens do **not** expire during the
+        testing program but can be revoked on request.
+
+  parameters:
+    HashPathParam:
+      name: hash
+      in: path
+      required: true
+      description: 64-character SHA-256 hash of the binary
+      schema:
+        type: string
+        pattern: '^[A-Fa-f0-9]{64}$'
+    CwePathParam:
+      name: cweId
+      in: path
+      required: true
+      description: CWE identifier (e.g. `CWE-242`)
+      schema:
+        type: string
+        pattern: '^CWE-\d+$'
+
+  schemas:
+    ## Primitive/common ##
+    StatusEnum:
+      type: string
+      enum: [queued, processing, completed]
+
+    ## High-level responses ##
+    BinaryStatus:
+      type: object
+      required: [hash, status]
+      properties:
+        hash:
+          type: string
+          description: SHA-256 hash of the binary
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        last_processed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the most recent completed analysis (present only when `status` =`completed`)
+    FindingSet:
+      description: Findings and metadata for **one** CWE inside a binary
+      type: object
+      required: [cwe_id, version, description, findings, metadata]
+      properties:
+        cwe_id:
+          type: string
+          example: CWE-242
+        version:
+          type: integer
+          minimum: 1
+        description:
+          type: string
+        findings:
+          type: array
+          description: |
+            Zero or more concrete occurrences detected for this CWE.
+            Object shape differs per-CWE; representative fields are modelled below.
+          items:
+            $ref: '#/components/schemas/LowLevelFinding'
+        metadata:
+          type: object
+          description: CWE-specific summary statistics (keys vary)
+          additionalProperties: true
+        analysis_timestamp:
+          type: string
+          format: date-time
+        ##  included again inside nested “findings” objects returned by service
+    LowLevelFinding:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          description: Decompiled source-like snippet
+        call_addr:
+          type: integer
+          format: int64
+        func_addr:
+          type: integer
+          format: int64
+        func_name:
+          type: string
+        parent_func_addr:
+          type: integer
+          format: int64
+        parent_func_name:
+          type: string
+    FindingsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BinaryStatus'
+        - type: object
+          required: [findings]
+          properties:
+            findings:
+              type: array
+              items:
+                $ref: '#/components/schemas/FindingSet'
+    SingleCWEResponse:
+      allOf:
+        - $ref: '#/components/schemas/BinaryStatus'
+        - type: object
+          required: [cwe_id, version, description, findings]
+          properties:
+            cwe_id:
+              type: string
+            version:
+              type: integer
+            description:
+              type: string
+            # NOTE: currently returned **Base-64-encoded** string – see PDF “known issue”.
+            findings:
+              type: string
+              description: |
+                Base-64-encoded JSON containing the same structure as a
+                FindingSet. Decode client-side until service is updated.
+    ## AI ##
+    AnalysisSnippet:
+      type: object
+      required: [id, code]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+    AnalysisPerspective:
+      type: object
+      required: [snippets, utilization]
+      properties:
+        snippets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisSnippet'
+        utilization:
+          type: string
+    AnalysisDetail:
+      type: object
+      required: [analysis, code, defensive, offensive]
+      properties:
+        analysis:
+          type: string
+          description: Natural-language explanation
+        code:
+          type: string
+          description: Offending code line
+        defensive:
+          $ref: '#/components/schemas/AnalysisPerspective'
+        offensive:
+          $ref: '#/components/schemas/AnalysisPerspective'
+    AIResult:
+      type: object
+      required: [analyses, status]
+      properties:
+        analyses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisDetail'
+        status:
+          type: string
+    AIAnalysis:
+      type: object
+      required: [generated_at, hash, last_processed_at, results, created_at, updated_at]
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        hash:
+          type: string
+        last_processed_at:
+          type: string
+          format: date-time
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AIResult'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AIAnalysisResponse:
+      allOf:
+        - $ref: '#/components/schemas/BinaryStatus'
+        - type: object
+          required: [analysis]
+          properties:
+            analysis:
+              $ref: '#/components/schemas/AIAnalysis'
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+paths:
+  /binaries:
+    post:
+      tags: [Binaries]
+      summary: Upload a binary and start processing
+      description: |
+        Accepts a binary file (≤ 100 MB).  
+        If the hash has never been seen, processing starts and `status` =`queued`.  
+        If the hash was seen before, the cached results are returned directly with `status` =`completed`.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [binary]
+              properties:
+                binary:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Current processing state for the uploaded hash
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BinaryStatus'
+              examples:
+                queued:
+                  summary: New file queued
+                  value:
+                    hash: 012345... (sha256)
+                    status: queued
+                completed:
+                  summary: File was already processed
+                  value:
+                    hash: 012345... (sha256)
+                    status: completed
+                    last_processed_at: "2025-01-23T19:21:06.535616Z"
+                processing:
+                  summary: File is currently being processed
+                  value:
+                    hash: 012345... (sha256)
+                    status: processing
+        "413":
+          description: File too large (>100 MB)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: uploaded file exceeds 100 MB limit
+  /binaries/{hash}:
+    get:
+      tags: [Binaries]
+      summary: Get processing status of a binary
+      parameters:
+        - $ref: '#/components/parameters/HashPathParam'
+      responses:
+        "200":
+          description: Current status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BinaryStatus'
+  /binaries/{hash}/findings:
+    get:
+      tags: [Findings]
+      summary: Get **all** CWE findings for a binary
+      parameters:
+        - $ref: '#/components/parameters/HashPathParam'
+      responses:
+        "200":
+          description: Findings available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindingsResponse'
+  /binaries/{hash}/findings/{cweId}:
+    get:
+      tags: [Findings]
+      summary: Get findings for one CWE in a binary
+      parameters:
+        - $ref: '#/components/parameters/HashPathParam'
+        - $ref: '#/components/parameters/CwePathParam'
+      responses:
+        "200":
+          description: CWE results (possible Base-64 payload, see description)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleCWEResponse'
+  /binaries/{hash}/ai:
+    post:
+      tags: [AI Analysis]
+      summary: Request AI analysis for a binary
+      description: |
+        Triggers AI analysis on *all* findings for the binary.  
+        The call is **synchronous** during Early-Adopter testing — the response
+        is returned only when analysis is complete.
+      parameters:
+        - $ref: '#/components/parameters/HashPathParam'
+      responses:
+        "200":
+          description: AI analysis complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIAnalysisResponse'
+    get:
+      tags: [AI Analysis]
+      summary: Retrieve existing AI analysis for a binary
+      parameters:
+        - $ref: '#/components/parameters/HashPathParam'
+      responses:
+        "200":
+          description: Previously generated AI analysis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIAnalysisResponse'
+        "404":
+          description: No AI analysis has been run for this binary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: no AI analysis found for this binary
