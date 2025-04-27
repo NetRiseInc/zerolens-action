@@ -9,7 +9,13 @@ const { uploadBinary, pollUntilCompleted } = require('./api/client');
 const { parseDuration } = require('./utils/parse-duration');
 
 const inputs = getInputs();
-console.log('Inputs parsed', inputs);
+// Avoid printing sensitive token value
+const { token: _redacted, ...inputsSafe } = inputs;
+console.log('Inputs parsed', inputsSafe);
+
+// Mask the token so if any library logs headers inadvertently it is redacted
+const core = require('@actions/core');
+core.setSecret(inputs.token);
 
 let aiResults = {};
 

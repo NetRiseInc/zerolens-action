@@ -1,5 +1,6 @@
-BIN_DIR = ../../build     # keep all binaries in top-level build/
-BIN     = $(BIN_DIR)/dummy
+# keep binaries in top-level build/
+BIN_DIR := ../../build
+BIN     := $(BIN_DIR)/dummy    # <-- include filename
 
 $(BIN): src/main.c
 	@mkdir -p $(BIN_DIR)
