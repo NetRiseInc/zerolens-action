@@ -11,6 +11,8 @@ module.exports = {
   setFailed: jest.fn((msg) => {
     throw new Error(msg);
   }),
+  startGroup: jest.fn(() => {}),
+  endGroup: jest.fn(() => {}),
   __setInputs: (obj) => {
     Object.keys(obj).forEach((k) => {
       inputs[k] = obj[k];

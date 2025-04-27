@@ -34,6 +34,11 @@ console.log('Inputs parsed', inputs);
     const findingsAgg = await getFindingsForHashes(hashList, inputs.token);
     console.log('Findings summary', findingsAgg.summary);
 
+    // RP-01 console summary
+    const { printConsoleSummary } = require('./report/console-summary');
+    // placeholder policy counts
+    printConsoleSummary({ blocking: 0, warnings: 0 }, findingsAgg.summary);
+
     if (inputs.ai) {
       const { getAIForHashes } = require('./api/client');
       const aiResults = await getAIForHashes(hashList, inputs.token);
