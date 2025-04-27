@@ -84,5 +84,16 @@ let aiResults = {};
     };
     Object.entries(outputs).forEach(([k, v]) => core.setOutput(k, v));
     console.log('[ZeroLens] Outputs set:', Object.keys(outputs).join(', '));
+
+    // PE-02: decide exit code and act accordingly
+    const { decideExitCode } = require('./policy/exit-code');
+    const exitCode = decideExitCode(policyOutcome.status, inputs.continueOnError);
+    if (exitCode === 1) {
+      core.setFailed('Policy violations triggered failure');
+    } else if (exitCode === 78) {
+      console.log('[ZeroLens] Policy warnings – neutral exit (78)');
+    }
+    // Exit with explicit code so act/github interprets correctly
+    process.exit(exitCode);
   }
 })(); 
