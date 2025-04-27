@@ -43,12 +43,12 @@ jobs:
       # 4. Validate **every** output exists & is non-empty
       - name: Assert outputs
         run: |
-          test -n "${{ steps.zerolens.outputs.hashes }}"
-          test -n "${{ steps.zerolens.outputs.findings_json }}"
-          test -n "${{ steps.zerolens.outputs.report }}"
-          test -n "${{ steps.zerolens.outputs.violations }}"
+          test -n '${{ steps.zerolens.outputs.hashes }}'
+          test -n '${{ steps.zerolens.outputs.findings_json }}'
+          test -n '${{ steps.zerolens.outputs.report }}'
+          test -n '${{ steps.zerolens.outputs.violations }}'
           # SARIF path is only set if sarif_path was provided
-          test -n "${{ steps.zerolens.outputs.sarif }}"
+          test -n '${{ steps.zerolens.outputs.sarif }}'
           echo "All outputs present ✅"
 
       # 5. Echo policy decision
