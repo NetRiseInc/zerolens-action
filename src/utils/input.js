@@ -37,6 +37,8 @@ function getInputs() {
 
   const reportPath = core.getInput('report_path') || flag('report_path') || 'zerolens-report.md';
 
+  const sarifPath = core.getInput('sarif_path') || flag('sarif_path') || '';
+
   const paths = fg.sync(tBinary);
   if (paths.length === 0) {
     core.setFailed(`No files matched pattern: ${tBinary}`);
@@ -51,7 +53,7 @@ function getInputs() {
     }
   });
 
-  return { token: tToken, paths, wait, pollInterval, timeout, ai, reportPath };
+  return { token: tToken, paths, wait, pollInterval, timeout, ai, reportPath, sarifPath };
 }
 
 module.exports = { getInputs }; 

@@ -51,5 +51,13 @@ console.log('Inputs parsed', inputs);
       writeFullReport(inputs.reportPath, md);
       console.log('Report written to', inputs.reportPath);
     }
+
+    // RP-04: SARIF emitter
+    if (inputs.sarifPath) {
+      const { buildSarif, writeSarif } = require('./report/sarif');
+      const sarif = buildSarif(findingsAgg);
+      writeSarif(inputs.sarifPath, sarif);
+      console.log('SARIF written to', inputs.sarifPath);
+    }
   }
 })(); 
