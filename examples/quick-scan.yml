@@ -1,0 +1,26 @@
+name: ZeroLens Quick Scan
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build binary
+        run: |
+          make build
+      - name: ZeroLens Scan
+        id: zerolens
+        uses: netrise/zerolens-action@v1
+        with:
+          token: ${{ secrets.ZEROLENS_TOKEN }}
+          binary: build/myapp # TODO: change to the path of the binary to scan
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZeroLens-Report
+          path: ${{ steps.zerolens.outputs.report }} 

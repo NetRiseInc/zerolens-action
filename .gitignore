@@ -7,3 +7,4 @@ requirements.md
 tasks.yaml
 node_modules/
 dist/
+.github/workflows/dev-*.yml

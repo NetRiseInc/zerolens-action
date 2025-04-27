@@ -1,0 +1,80 @@
+name: 'NetRise ZeroLens Scan'
+description: 'Upload binaries to NetRise ZeroLens API, wait for analysis, and output findings, reports, and SARIF.'
+author: 'NetRise'
+branding:
+  icon: 'shield'
+  color: 'blue'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+
+inputs:
+  token:
+    description: 'API token (X-Authorization header)'
+    required: true
+  binary:
+    description: 'Path or glob to binary file(s) to upload'
+    required: true
+  wait:
+    description: 'Wait for processing to complete?'
+    default: 'true'
+    required: false
+  poll_interval:
+    description: 'Polling interval (e.g. 5s)'
+    default: '5s'
+    required: false
+  timeout:
+    description: 'Maximum wait time per binary (e.g. 10m)'
+    default: '10m'
+    required: false
+  ai_analysis:
+    description: 'Request AI analysis after findings?'
+    default: 'false'
+    required: false
+  fail_on_cwe:
+    description: 'Comma-separated list of CWE IDs that fail the build if present'
+    required: false
+  warn_on_cwe:
+    description: 'CWE IDs that warn but do not fail'
+    required: false
+  max_findings:
+    description: 'Fail if total findings exceed this number (0 = disabled)'
+    default: '0'
+    required: false
+  report_path:
+    description: 'Where to write the full Markdown report'
+    default: 'zerolens-report.md'
+    required: false
+  upload_artifact:
+    description: 'Upload the report via actions/upload-artifact'
+    default: 'true'
+    required: false
+  continue_on_error:
+    description: 'Do not fail job even if policy violated'
+    default: 'false'
+    required: false
+  comment_pr:
+    description: 'Post a summary comment on pull requests'
+    default: 'false'
+    required: false
+  create_report_pr:
+    description: 'Create a draft PR containing the full report'
+    default: 'false'
+    required: false
+  sarif_path:
+    description: 'If set, also emit findings in SARIF format to this path'
+    required: false
+
+outputs:
+  hashes:
+    description: 'JSON array of SHA-256 hashes uploaded'
+  findings_json:
+    description: 'Raw JSON of findings per binary'
+  ai_json:
+    description: 'Raw AI analysis JSON (empty when ai_analysis=false)'
+  report:
+    description: 'Path to the generated Markdown report'
+  sarif:
+    description: 'Path to the SARIF file (empty when disabled)'
+  violations:
+    description: 'JSON list of policy violations that triggered warn/fail' 

@@ -13,6 +13,7 @@ module.exports = {
   }),
   startGroup: jest.fn(() => {}),
   endGroup: jest.fn(() => {}),
+  setOutput: jest.fn(() => {}),
   __setInputs: (obj) => {
     Object.keys(obj).forEach((k) => {
       inputs[k] = obj[k];

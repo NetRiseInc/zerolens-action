@@ -11,6 +11,8 @@ const { parseDuration } = require('./utils/parse-duration');
 const inputs = getInputs();
 console.log('Inputs parsed', inputs);
 
+let aiResults = {};
+
 (async () => {
   const hashes = await hashFiles(inputs.paths);
   console.log('Hashes', hashes);
@@ -44,7 +46,7 @@ console.log('Inputs parsed', inputs);
 
     if (inputs.ai) {
       const { getAIForHashes } = require('./api/client');
-      const aiResults = await getAIForHashes(hashList, inputs.token);
+      aiResults = await getAIForHashes(hashList, inputs.token);
       console.log('AI analysis retrieved for', Object.keys(aiResults).length, 'binaries');
       const { buildReport, writeFullReport } = require('./report/full-report');
       const md = buildReport(findingsAgg, aiResults, hashList, { blocking: 0, warnings: 0 });
@@ -59,5 +61,18 @@ console.log('Inputs parsed', inputs);
       writeSarif(inputs.sarifPath, sarif);
       console.log('SARIF written to', inputs.sarifPath);
     }
+
+    // RP-05: set action outputs
+    const core = require('@actions/core');
+    const outputs = {
+      hashes: JSON.stringify(hashList),
+      findings_json: JSON.stringify(findingsAgg.binaries),
+      ai_json: inputs.ai ? JSON.stringify(aiResults || {}) : '',
+      report: inputs.reportPath || '',
+      sarif: inputs.sarifPath || '',
+      violations: JSON.stringify([]), // placeholder until policy engine implemented
+    };
+    Object.entries(outputs).forEach(([k, v]) => core.setOutput(k, v));
+    console.log('[ZeroLens] Outputs set:', Object.keys(outputs).join(', '));
   }
 })(); 
