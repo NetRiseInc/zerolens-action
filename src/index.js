@@ -46,6 +46,10 @@ console.log('Inputs parsed', inputs);
       const { getAIForHashes } = require('./api/client');
       const aiResults = await getAIForHashes(hashList, inputs.token);
       console.log('AI analysis retrieved for', Object.keys(aiResults).length, 'binaries');
+      const { buildReport, writeFullReport } = require('./report/full-report');
+      const md = buildReport(findingsAgg, aiResults, hashList, { blocking: 0, warnings: 0 });
+      writeFullReport(inputs.reportPath, md);
+      console.log('Report written to', inputs.reportPath);
     }
   }
 })(); 

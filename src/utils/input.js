@@ -35,6 +35,8 @@ function getInputs() {
     parseBool(core.getInput('ai_analysis')) ??
     (flag('ai_analysis') === true || flag('ai_analysis') === 'true' ? true : false);
 
+  const reportPath = core.getInput('report_path') || flag('report_path') || 'zerolens-report.md';
+
   const paths = fg.sync(tBinary);
   if (paths.length === 0) {
     core.setFailed(`No files matched pattern: ${tBinary}`);
@@ -49,7 +51,7 @@ function getInputs() {
     }
   });
 
-  return { token: tToken, paths, wait, pollInterval, timeout, ai };
+  return { token: tToken, paths, wait, pollInterval, timeout, ai, reportPath };
 }
 
 module.exports = { getInputs }; 
