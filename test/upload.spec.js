@@ -7,7 +7,7 @@ jest.mock('undici', () => {
       append(name, blob) { this.entries.push({ name, blob }); }
     },
     Blob,
-    request: jest.fn(async (url, opts) => {
+    request: jest.fn(async (url, _opts) => {
       if (url.endsWith('/binaries')) {
         return {
           statusCode: 200,

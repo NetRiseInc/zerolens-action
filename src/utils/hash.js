@@ -1,9 +1,5 @@
 const crypto = require('crypto');
 const fs = require('fs');
-const { pipeline } = require('stream');
-const { promisify } = require('util');
-
-const pipe = promisify(pipeline);
 
 async function sha256(file) {
   return new Promise((resolve, reject) => {

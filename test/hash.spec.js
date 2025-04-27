@@ -1,5 +1,4 @@
 const { vol } = require('memfs');
-const fs = require('fs');
 const { sha256, hashFiles } = require('../src/utils/hash');
 
 jest.mock('fs', () => require('memfs').fs);

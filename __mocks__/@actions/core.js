@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const inputs = {};
 module.exports = {
   getInput: (k, opt = {}) => {
