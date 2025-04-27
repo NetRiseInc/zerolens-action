@@ -33,5 +33,11 @@ console.log('Inputs parsed', inputs);
     const { getFindingsForHashes } = require('./api/client');
     const findingsAgg = await getFindingsForHashes(hashList, inputs.token);
     console.log('Findings summary', findingsAgg.summary);
+
+    if (inputs.ai) {
+      const { getAIForHashes } = require('./api/client');
+      const aiResults = await getAIForHashes(hashList, inputs.token);
+      console.log('AI analysis retrieved for', Object.keys(aiResults).length, 'binaries');
+    }
   }
 })(); 

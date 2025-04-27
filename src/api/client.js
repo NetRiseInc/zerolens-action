@@ -79,10 +79,51 @@ async function getFindingsForHashes(hashes, token) {
   return combined;
 }
 
+async function getAIAnalysis(hash, token) {
+  const res = await request(`${BASE}/binaries/${hash}/ai`, {
+    method: 'GET',
+    headers: { 'X-Authorization': token },
+  });
+  if (res.statusCode === 404) return null; // no analysis yet
+  if (res.statusCode !== 200) throw new Error(`AI GET error ${res.statusCode}`);
+  return res.body.json();
+}
+
+async function requestAIAnalysis(hash, token) {
+  const res = await request(`${BASE}/binaries/${hash}/ai`, {
+    method: 'POST',
+    headers: { 'X-Authorization': token },
+  });
+  if (res.statusCode !== 200) throw new Error(`AI POST error ${res.statusCode}`);
+  return res.body.json();
+}
+
+/**
+ * Ensure AI analysis exists for given hash (per Early-Adopter synchronous behaviour).
+ * Returns AIAnalysisResponse.
+ */
+async function ensureAIAnalysis(hash, token) {
+  const existing = await getAIAnalysis(hash, token);
+  if (existing) return existing;
+  return requestAIAnalysis(hash, token);
+}
+
+async function getAIForHashes(hashes, token) {
+  const out = {};
+  for (const h of hashes) {
+    out[h] = await ensureAIAnalysis(h, token);
+  }
+  return out;
+}
+
 module.exports = {
   uploadBinary,
   getStatus,
   pollUntilCompleted,
   getFindings,
   getFindingsForHashes,
+  getAIAnalysis,
+  requestAIAnalysis,
+  ensureAIAnalysis,
+  getAIForHashes,
 }; 
