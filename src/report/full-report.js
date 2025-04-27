@@ -28,12 +28,15 @@ function buildReport(findingsAgg, aiResults, hashes, policy) {
     md += '\n';
   });
 
-  if (aiResults) {
+  if (aiResults && Object.keys(aiResults).length) {
     md += '\n## AI Analysis\n';
     Object.values(aiResults).forEach((ai) => {
+      if (!ai || !ai.analysis || !Array.isArray(ai.analysis.results)) return;
       ai.analysis.results.forEach((r) => {
+        if (!r || !Array.isArray(r.analyses)) return;
         r.analyses.forEach((an) => {
-          md += `\n> **${an.code}**\n\n${an.analysis}\n`;
+          if (!an) return;
+          md += `\n> **${an.code || ''}**\n\n${an.analysis || ''}\n`;
         });
       });
     });
