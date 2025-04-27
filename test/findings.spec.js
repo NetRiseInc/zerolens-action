@@ -31,6 +31,19 @@ jest.mock('undici', () => {
         },
       ],
     },
+    'meta': {
+      hash: 'meta',
+      status: 'completed',
+      findings: [
+        {
+          cwe_id: 'CWE-242',
+          version: 1,
+          description: 'Danger funcs',
+          findings: {},
+          metadata: { total_findings: 4 },
+        },
+      ],
+    },
   };
 
   return {
@@ -62,9 +75,9 @@ describe('findings fetcher', () => {
   });
 
   it('aggregates findings across hashes', async () => {
-    const result = await getFindingsForHashes(['h1', 'h2'], token);
-    expect(Object.keys(result.binaries)).toHaveLength(2);
-    expect(result.summary).toEqual({ 'CWE-119': 3, 'CWE-242': 1 });
-    expect(result.findings.length).toBe(3);
+    const result = await getFindingsForHashes(['h1', 'h2', 'meta'], token);
+    expect(Object.keys(result.binaries)).toHaveLength(3);
+    expect(result.summary).toEqual({ 'CWE-119': 3, 'CWE-242': 5 });
+    expect(result.findings.length).toBe(4);
   });
 }); 

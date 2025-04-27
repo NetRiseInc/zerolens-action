@@ -39,6 +39,9 @@ console.log('Inputs parsed', inputs);
     // placeholder policy counts
     printConsoleSummary({ blocking: 0, warnings: 0 }, findingsAgg.summary);
 
+    const { writeStepSummary } = require('./report/step-summary');
+    writeStepSummary({ blocking: 0, warnings: 0 }, findingsAgg.summary, inputs.ai);
+
     if (inputs.ai) {
       const { getAIForHashes } = require('./api/client');
       const aiResults = await getAIForHashes(hashList, inputs.token);

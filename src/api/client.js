@@ -69,8 +69,25 @@ async function getFindingsForHashes(hashes, token) {
 
     if (Array.isArray(data.findings)) {
       for (const set of data.findings) {
-        // Count number of low-level findings for this CWE in this binary
-        const count = Array.isArray(set.findings) ? set.findings.length : 0;
+        // Determine count intelligently
+        let count = 0;
+        if (Array.isArray(set.findings)) {
+          count = set.findings.length;
+        } else if (set.findings && Array.isArray(set.findings.findings)) {
+          count = set.findings.findings.length;
+        }
+        if (count === 0 && set.metadata) {
+          const metaCount =
+            set.metadata.total_findings ||
+            set.metadata.overflow_count ||
+            set.metadata.vulnerable_calls ||
+            set.metadata.total_weak_crypto_calls ||
+            set.metadata.total_weak_hash_calls ||
+            set.metadata.total_format_calls ||
+            set.metadata.total_calls ||
+            0;
+          count = metaCount;
+        }
         combined.summary[set.cwe_id] = (combined.summary[set.cwe_id] || 0) + count;
         combined.findings.push({ hash, ...set });
       }
