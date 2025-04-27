@@ -52,7 +52,7 @@ jobs:
 
       # 5. Echo policy decision
       - run: |
-          echo "Violations:  ${{ steps.zerolens.outputs.violations }}"
+          printf 'Violations: %s\n' '${{ steps.zerolens.outputs.violations }}'
           echo "Exit code should already reflect policy engine"
 
       # 6. Upload artefacts so we can inspect in the UI
