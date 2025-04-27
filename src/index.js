@@ -26,4 +26,12 @@ console.log('Inputs parsed', inputs);
       console.log('Completed', final.status);
     }
   }
+
+  // CF-05: fetch findings once all binaries processed (or skip if wait=false)
+  if (inputs.wait) {
+    const hashList = Object.values(hashes);
+    const { getFindingsForHashes } = require('./api/client');
+    const findingsAgg = await getFindingsForHashes(hashList, inputs.token);
+    console.log('Findings summary', findingsAgg.summary);
+  }
 })(); 
