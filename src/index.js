@@ -5,7 +5,8 @@
 
 const { getInputs } = require('./utils/input.js');
 const { hashFiles } = require('./utils/hash');
-const { uploadBinary } = require('./api/client');
+const { uploadBinary, pollUntilCompleted } = require('./api/client');
+const { parseDuration } = require('./utils/parse-duration');
 
 const inputs = getInputs();
 console.log('Inputs parsed', inputs);
@@ -18,5 +19,11 @@ console.log('Inputs parsed', inputs);
     console.log(`Uploading ${p}...`);
     const status = await uploadBinary(p, inputs.token);
     console.log('Upload response', status);
+    if (inputs.wait) {
+      const intervalMs = parseDuration(inputs.pollInterval);
+      const timeoutMs = parseDuration(inputs.timeout);
+      const final = await pollUntilCompleted(status.hash, inputs.token, intervalMs, timeoutMs);
+      console.log('Completed', final.status);
+    }
   }
 })(); 

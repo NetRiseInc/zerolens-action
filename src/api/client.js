@@ -4,10 +4,9 @@ const BASE = 'https://zerolens.netrise.io';
 
 async function uploadBinary(filePath, token) {
   const fd = new FormData();
-  fd.append('binary', fs.createReadStream(filePath), {
-    filename: filePath.split('/').pop(),
-    contentType: 'application/octet-stream',
-  });
+  const data = fs.readFileSync(filePath);
+  const blob = new Blob([data], { type: 'application/octet-stream' });
+  fd.append('binary', blob, filePath.split('/').pop());
 
   const res = await request(`${BASE}/binaries`, {
     method: 'POST',
@@ -25,4 +24,23 @@ async function uploadBinary(filePath, token) {
   return res.body.json();
 }
 
-module.exports = { uploadBinary }; 
+async function getStatus(hash, token) {
+  const res = await request(`${BASE}/binaries/${hash}`, {
+    method: 'GET',
+    headers: { 'X-Authorization': token },
+  });
+  if (res.statusCode !== 200) throw new Error(`Status error ${res.statusCode}`);
+  return res.body.json();
+}
+
+async function pollUntilCompleted(hash, token, intervalMs, timeoutMs) {
+  const start = Date.now();
+  while (true) {
+    const status = await getStatus(hash, token);
+    if (status.status === 'completed') return status;
+    if (Date.now() - start > timeoutMs) throw new Error('Polling timeout');
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+}
+
+module.exports = { uploadBinary, getStatus, pollUntilCompleted }; 
