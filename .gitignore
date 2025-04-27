@@ -3,3 +3,5 @@
 .env*
 mem.json
 api.pdf
+requirements.md
+tasks.yaml
