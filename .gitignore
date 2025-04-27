@@ -5,3 +5,5 @@ mem.json
 api.pdf
 requirements.md
 tasks.yaml
+node_modules/
+dist/
