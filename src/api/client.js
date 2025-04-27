@@ -90,6 +90,9 @@ async function getFindingsForHashes(hashes, token) {
             0;
           count = metaCount;
         }
+        if (count === 0) {
+          continue; // skip sets without actual findings
+        }
         combined.summary[set.cwe_id] = (combined.summary[set.cwe_id] || 0) + count;
         combined.findings.push({ hash, ...set });
       }
