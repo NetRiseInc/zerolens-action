@@ -8,7 +8,7 @@
  */
 function decideExitCode(status, continueOnError) {
   if (status === 'ok') return 0;
-  if (status === 'warn') return 78; // neutral
+  if (status === 'warn') return 0; // warnings no longer cause neutral exit
   // status === 'fail'
   return continueOnError ? 78 : 1;
 }
