@@ -1,6 +1,7 @@
 const { request, FormData } = require('undici');
 const fs = require('fs');
 const BASE = 'https://zerolens.netrise.io';
+const { retry } = require('../utils/retry');
 
 async function uploadBinary(filePath, token) {
   const fd = new FormData();
@@ -8,20 +9,21 @@ async function uploadBinary(filePath, token) {
   const blob = new Blob([data], { type: 'application/octet-stream' });
   fd.append('binary', blob, filePath.split('/').pop());
 
-  const res = await request(`${BASE}/binaries`, {
-    method: 'POST',
-    headers: {
-      'X-Authorization': token,
-    },
-    body: fd,
+  return retry(async () => {
+    const res = await request(`${BASE}/binaries`, {
+      method: 'POST',
+      headers: {
+        'X-Authorization': token,
+      },
+      body: fd,
+    });
+
+    if (res.statusCode !== 200) {
+      const text = await res.body.text();
+      throw new Error(`Upload failed (${res.statusCode}): ${text}`);
+    }
+    return res.body.json();
   });
-
-  if (res.statusCode !== 200) {
-    const text = await res.body.text();
-    throw new Error(`Upload failed (${res.statusCode}): ${text}`);
-  }
-
-  return res.body.json();
 }
 
 async function getStatus(hash, token) {
