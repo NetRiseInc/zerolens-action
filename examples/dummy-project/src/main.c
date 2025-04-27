@@ -1,18 +1,17 @@
 #include <stdio.h>
-#include <string.h> // CWE-120 (unsafe strcpy) and CWE-676 (dangerous strcat)
+#include <string.h>
 
 int main(void)
 {
-    // Declare volatile pointers to avoid inlining/builtin replacement
     volatile char *(*vstrcpy)(char *, const char *) = strcpy;
     volatile char *(*vstrcat)(char *, const char *) = strcat;
 
     char buf[4];
-    vstrcpy((char *)buf, "OVERFLOW"); // CWE-119/120
+    vstrcpy((char *)buf, "OVERFLOW");
 
     char msg[32] = "Hello ";
-    vstrcat(msg, (char *)buf); // CWE-676
+    vstrcat(msg, (char *)buf);
 
-    printf("hello world – %s\n", msg);
+    printf("hello world – %s\n", msg); // CWE-134 (unsafe printf)
     return 0;
 }
