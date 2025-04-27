@@ -39,6 +39,31 @@ function getInputs() {
 
   const sarifPath = core.getInput('sarif_path') || flag('sarif_path') || '';
 
+  // Policy related inputs
+  function parseList(str) {
+    if (!str) return [];
+    try {
+      // if JSON array provided
+      const arr = JSON.parse(str);
+      if (Array.isArray(arr)) return arr.map(String);
+    } catch {
+      /* fallthrough */
+    }
+    return String(str)
+      .split(/[,\s]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  const failOnCwe = parseList(core.getInput('fail_on_cwe') || flag('fail_on_cwe') || '');
+  const warnOnCwe = parseList(core.getInput('warn_on_cwe') || flag('warn_on_cwe') || '');
+
+  const maxFindings = Number(core.getInput('max_findings') || flag('max_findings') || 0);
+
+  const continueOnError =
+    parseBool(core.getInput('continue_on_error')) ??
+    (flag('continue_on_error') === true || flag('continue_on_error') === 'true' ? true : false);
+
   const paths = fg.sync(tBinary);
   if (paths.length === 0) {
     core.setFailed(`No files matched pattern: ${tBinary}`);
@@ -53,7 +78,20 @@ function getInputs() {
     }
   });
 
-  return { token: tToken, paths, wait, pollInterval, timeout, ai, reportPath, sarifPath };
+  return {
+    token: tToken,
+    paths,
+    wait,
+    pollInterval,
+    timeout,
+    ai,
+    reportPath,
+    sarifPath,
+    failOnCwe,
+    warnOnCwe,
+    maxFindings,
+    continueOnError,
+  };
 }
 
 module.exports = { getInputs }; 

@@ -1,0 +1,30 @@
+name: ZeroLens PR Gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build binary
+        run: |
+          make build
+      - name: ZeroLens Scan (PR Gate)
+        id: zerolens
+        uses: netrise/zerolens-action@v1
+        with:
+          token: ${{ secrets.ZEROLENS_TOKEN }}
+          binary: build/myapp # TODO: change to the path of the binary to scan
+          fail_on_cwe: CWE-119,CWE-242
+          warn_on_cwe: CWE-20,CWE-78
+          max_findings: 25
+          comment_pr: true
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZeroLens-PR-Report
+          path: ${{ steps.zerolens.outputs.report }} 

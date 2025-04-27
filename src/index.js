@@ -36,20 +36,30 @@ let aiResults = {};
     const findingsAgg = await getFindingsForHashes(hashList, inputs.token);
     console.log('Findings summary', findingsAgg.summary);
 
+    // Evaluate policy
+    const { evaluatePolicy } = require('./policy/evaluate');
+    let timeoutOccurred = false;
+    // Future: capture polling timeout flag; for now always false as errors would have thrown
+    const policyOutcome = evaluatePolicy(findingsAgg.findings, {
+      failCWE: inputs.failOnCwe,
+      warnCWE: inputs.warnOnCwe,
+      maxFindings: inputs.maxFindings,
+      timeout: timeoutOccurred,
+    });
+
     // RP-01 console summary
     const { printConsoleSummary } = require('./report/console-summary');
-    // placeholder policy counts
-    printConsoleSummary({ blocking: 0, warnings: 0 }, findingsAgg.summary);
+    printConsoleSummary(policyOutcome.counts, findingsAgg.summary);
 
     const { writeStepSummary } = require('./report/step-summary');
-    writeStepSummary({ blocking: 0, warnings: 0 }, findingsAgg.summary, inputs.ai);
+    writeStepSummary(policyOutcome.counts, findingsAgg.summary, inputs.ai);
 
     if (inputs.ai) {
       const { getAIForHashes } = require('./api/client');
       aiResults = await getAIForHashes(hashList, inputs.token);
       console.log('AI analysis retrieved for', Object.keys(aiResults).length, 'binaries');
       const { buildReport, writeFullReport } = require('./report/full-report');
-      const md = buildReport(findingsAgg, aiResults, hashList, { blocking: 0, warnings: 0 });
+      const md = buildReport(findingsAgg, aiResults, hashList, policyOutcome.counts);
       writeFullReport(inputs.reportPath, md);
       console.log('Report written to', inputs.reportPath);
     }
@@ -70,7 +80,7 @@ let aiResults = {};
       ai_json: inputs.ai ? JSON.stringify(aiResults || {}) : '',
       report: inputs.reportPath || '',
       sarif: inputs.sarifPath || '',
-      violations: JSON.stringify([]), // placeholder until policy engine implemented
+      violations: JSON.stringify(policyOutcome.violations),
     };
     Object.entries(outputs).forEach(([k, v]) => core.setOutput(k, v));
     console.log('[ZeroLens] Outputs set:', Object.keys(outputs).join(', '));
