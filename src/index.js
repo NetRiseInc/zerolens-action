@@ -3,4 +3,7 @@
  * Real logic will be implemented in subsequent tasks.
  */
 
-console.log('ZeroLens Action bootstrap – work in progress'); 
+const { getInputs } = require('./utils/input.js');
+
+const inputs = getInputs();
+console.log('Inputs parsed', inputs); 
