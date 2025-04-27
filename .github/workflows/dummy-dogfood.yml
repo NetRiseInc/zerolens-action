@@ -34,7 +34,7 @@ jobs:
           token: ${{ secrets.ZEROLENS_TOKEN }}
           binary: build/dummy
           fail_on_cwe: CWE-119        # we intentionally trigger it
-          warn_on_cwe: CWE-120
+          warn_on_cwe: CWE-120,CWE-676
           max_findings: 10
           ai_analysis: true
           sarif_path: out/dummy.sarif
