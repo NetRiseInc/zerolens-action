@@ -16,7 +16,7 @@ It uploads binaries, waits for analysis (optionally including AI-generated findi
 
 - Zero-config install; sensible, safe defaults
 - Supports all runner OSes (Linux, macOS, Windows)
-- Multi-layer reporting (console, Step Summary, Markdown artefact, SARIF)
+- Multi-layer reporting (console, Step Summary, Markdown artifact, SARIF)
 - Customizable fail/warn policies per CWE, total finding count, or scanning timeout
 - Optional AI-generated analysis sections
 - PR comment automation
@@ -55,7 +55,7 @@ jobs:
 
 That's it! :rocket:
 
-- Find your scan report in workflow artefacts.
+- Find your scan report in workflow artifacts.
 - Output summary appears in your job logs.
 - Adjust policies or enable advanced features as needed.
 
@@ -76,7 +76,7 @@ That's it! :rocket:
 | `fail_on_cwe`       | no       | _(empty)_            | Comma-separated or JSON array of CWE IDs (e.g. `CWE-119,CWE-242`) that **fail** the build if found.                   |
 | `warn_on_cwe`       | no       | _(empty)_            | CWEs that cause warnings but do not fail the build.                                                                   |
 | `max_findings`      | no       | `0`                  | Fail if total findings exceed this number (`0` disables limit).                                                       |
-| `report_path`       | no       | `zerolens-report.md` | Where to write the Markdown report artefact.                                                                          |
+| `report_path`       | no       | `zerolens-report.md` | Where to write the Markdown report artifact.                                                                          |
 | `upload_artifact`   | no       | `true`               | Uploads the Markdown report using [`upload-artifact`](https://github.com/actions/upload-artifact).                    |
 | `continue_on_error` | no       | `false`              | Do not fail job even if policy is violated (useful for experimentation).                                              |
 | `comment_pr`        | no       | `false`              | Post a summary PR comment (on `pull_request` event).                                                                  |
@@ -129,7 +129,7 @@ jobs:
 
 - **Fails** build if configured CWEs are detected or finding count is exceeded.
 - Posts a summary comment into the PR showing blocking/warning CWEs.
-- Full report is available as an artefact.
+- Full report is available as an artifact.
 
 ---
 
@@ -139,10 +139,10 @@ The Action reports results through **four layers**:
 
 1. **Console Log Summary** – status and counts, emoji, grouped for easy review.
 2. **Step Summary (`GITHUB_STEP_SUMMARY`)** – Markdown summary table appears in the Actions UI.
-3. **Markdown Artefact** (`report_path`) – full, detailed, audit-friendly report with collapsible details.
+3. **Markdown artifact** (`report_path`) – full, detailed, audit-friendly report with collapsible details.
 4. **Optional SARIF (`sarif_path`)** – enables code scanning alerts and security tab integration.
 
-You always get at-a-glance, readable results, plus artefacts for audits or security programs.
+You always get at-a-glance, readable results, plus artifacts for audits or security programs.
 
 ---
 
