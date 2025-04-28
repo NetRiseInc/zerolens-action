@@ -41,7 +41,17 @@ function buildSarif(findingsAgg) {
         res.locations = [
           {
             physicalLocation: {
+              artifactLocation: { uri: (set.hash || 'binary'), index: 0 },
               address: { absoluteAddress: f.call_addr, kind: 'instruction' },
+            },
+          },
+        ];
+      } else {
+        // Provide minimal artifact location even without address to satisfy SARIF1006
+        res.locations = [
+          {
+            physicalLocation: {
+              artifactLocation: { uri: (set.hash || 'binary'), index: 0 },
             },
           },
         ];
@@ -64,6 +74,12 @@ function buildSarif(findingsAgg) {
             rules: Object.values(rulesMap),
           },
         },
+        artifacts: [
+          {
+            location: { uri: 'binary', index: 0 },
+            description: { text: 'Scanned binary file' },
+          },
+        ],
         results,
       },
     ],
