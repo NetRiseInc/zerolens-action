@@ -85,8 +85,6 @@ That's it! :rocket:
 | `sarif_path`        | no       | _(empty)_            | Emit findings in [SARIF v2.1.0](https://sarifweb.azurewebsites.net/) to this file, suitable for GitHub code scanning. |
 | `github_token`      | no       | GITHUB_TOKEN env     | Token for PR comments; typically `${{ github.token }}`.                                                               |
 
-#### _Required inputs_ are marked **bold**.
-
 ---
 
 ### Outputs
