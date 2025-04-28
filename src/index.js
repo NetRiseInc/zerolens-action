@@ -60,7 +60,7 @@ let aiResults = {};
       aiResults = await getAIForHashes(hashList, inputs.token);
       console.log('AI analysis retrieved for', Object.keys(aiResults).length, 'binaries');
       const { buildReport, writeFullReport } = require('./report/full-report');
-      const md = buildReport(findingsAgg, aiResults, hashList, policyOutcome.counts);
+      const md = buildReport(findingsAgg, aiResults, hashList, policyOutcome.counts, inputs.ai);
       writeFullReport(inputs.reportPath, md);
       console.log('Report written to', inputs.reportPath);
     }

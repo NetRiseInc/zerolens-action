@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-function buildReport(findingsAgg, aiResults, hashes, policy) {
-  let md = '# ZeroLens Security Report\n\n';
+function buildReport(findingsAgg, aiResults, hashes, policy, aiEnabled = false) {
+  let md = '# NetRise ZeroLens Security Report\n\n';
+  md += '[https://www.netrise.io](https://www.netrise.io)\n\n';
   md += `**Generated:** ${new Date().toISOString()}  \n`;
   md += `**Binaries:** ${hashes.join(', ')}\n\n`;
 
@@ -22,13 +23,17 @@ function buildReport(findingsAgg, aiResults, hashes, policy) {
     const arr = Array.isArray(set.findings.findings)
       ? set.findings.findings
       : set.findings;
-    arr.slice(0, 10).forEach((f, idx) => {
-      md += `**Finding ${idx + 1}:** \`${f.code}\`  \n`;
-    });
-    md += '\n';
+    if (!arr || arr.length === 0) {
+      md += '_No issues found for this CWE._\n\n';
+    } else {
+      arr.slice(0, 10).forEach((f, idx) => {
+        md += `**Finding ${idx + 1}:** \`${f.code}\`  \n`;
+      });
+      md += '\n';
+    }
   });
 
-  if (aiResults && Object.keys(aiResults).length) {
+  if (aiEnabled && aiResults && Object.keys(aiResults).length) {
     md += '\n## AI Analysis\n';
     Object.values(aiResults).forEach((ai) => {
       if (!ai || !ai.analysis || !Array.isArray(ai.analysis.results)) return;
@@ -40,6 +45,8 @@ function buildReport(findingsAgg, aiResults, hashes, policy) {
         });
       });
     });
+  } else if (aiEnabled) {
+    md += '\n## AI Analysis\n\n_AI summary could not be retrieved. If you are participating in the Early-Adopter program, please ensure your token has AI access or contact NetRise at https://www.netrise.io._\n';
   }
 
   return md;
