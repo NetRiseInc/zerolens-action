@@ -1,8 +1,3 @@
-/**
- * NetRise ZeroLens GitHub Action – entrypoint (placeholder)
- * Real logic will be implemented in subsequent tasks.
- */
-
 const { getInputs } = require('./utils/input.js');
 const { hashFiles } = require('./utils/hash');
 const { uploadBinary, pollUntilCompleted } = require('./api/client');
@@ -99,6 +94,31 @@ let aiResults = {};
     } else if (exitCode === 78) {
       console.log('[ZeroLens] Policy warnings – neutral exit (78)');
     }
+
+    // CO-01: optional PR comment
+    if (inputs.commentPr && process.env.GITHUB_EVENT_NAME === 'pull_request') {
+      const github = require('@actions/github');
+      const core = require('@actions/core');
+      try {
+        const octokit = github.getOctokit(core.getInput('token'));
+        const { owner, repo } = github.context.repo;
+        const issue_number = github.context.payload.pull_request.number;
+        const { buildMarkdown } = require('./report/step-summary');
+        const body = buildMarkdown(policyOutcome.counts, findingsAgg.summary, inputs.ai);
+        // find existing comment by bot
+        const { data: comments } = await octokit.rest.issues.listComments({ owner, repo, issue_number });
+        const prev = comments.find((c) => c.user.type === 'Bot' && c.body.includes('ZeroLens Scan Summary'));
+        if (prev) {
+          await octokit.rest.issues.updateComment({ owner, repo, comment_id: prev.id, body });
+        } else {
+          await octokit.rest.issues.createComment({ owner, repo, issue_number, body });
+        }
+        console.log('[ZeroLens] PR comment posted/updated');
+      } catch (err) {
+        console.warn('[ZeroLens] Failed to post PR comment:', err.message);
+      }
+    }
+
     // Exit with explicit code so act/github interprets correctly
     process.exit(exitCode);
   }

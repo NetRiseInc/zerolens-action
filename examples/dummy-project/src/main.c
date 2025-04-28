@@ -3,6 +3,7 @@
 
 int main(void)
 {
+    // CO_01 pr tag
     volatile char *(*vstrcpy)(char *, const char *) = strcpy;
     volatile char *(*vstrcat)(char *, const char *) = strcat;
 

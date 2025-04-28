@@ -64,6 +64,10 @@ function getInputs() {
     parseBool(core.getInput('continue_on_error')) ??
     (flag('continue_on_error') === true || flag('continue_on_error') === 'true' ? true : false);
 
+  const commentPr =
+    parseBool(core.getInput('comment_pr')) ??
+    (flag('comment_pr') === true || flag('comment_pr') === 'true' ? true : false);
+
   const paths = fg.sync(tBinary);
   if (paths.length === 0) {
     core.setFailed(`No files matched pattern: ${tBinary}`);
@@ -91,6 +95,7 @@ function getInputs() {
     warnOnCwe,
     maxFindings,
     continueOnError,
+    commentPr,
   };
 }
 
