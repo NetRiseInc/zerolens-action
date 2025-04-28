@@ -5,7 +5,8 @@ const { parseDuration } = require('./utils/parse-duration');
 
 const inputs = getInputs();
 // Avoid printing sensitive token value
-const { token: _redacted, ...inputsSafe } = inputs;
+const { token: _token, ...inputsSafe } = inputs;
+void _token; // prevent eslint no-unused-vars
 console.log('Inputs parsed', inputsSafe);
 
 // Mask the token so if any library logs headers inadvertently it is redacted
