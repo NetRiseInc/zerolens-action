@@ -223,7 +223,6 @@ See [`examples/`](./examples/) for more scenarios:
 
 ## Developer & Contribution
 
-- [Requirements & Design](./requirements.md)
 - [Architectural ADR](./docs/adr/0001-initial-architecture.md)
 - Test with `npm test` or run full E2E locally with [`act`](https://github.com/nektos/act).
 
