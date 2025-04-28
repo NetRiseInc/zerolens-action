@@ -207,7 +207,6 @@ To enable GitHub's [Security tab](https://docs.github.com/en/code-security/code-
 - **100MB** max per binary; checked locally _before_ uploading.
 - **No build tools required** – runs as bundled JavaScript.
 - **Tokens are always redacted in logs.**
-- **Tested on all runners:** Ubuntu, macOS, Windows.
 - **Minimum dep surface:** Node 20+. No TypeScript compile, Docker or system deps needed.
 
 ---
@@ -226,14 +225,6 @@ See [`examples/`](./examples/) for more scenarios:
 
 - [Architectural ADR](./docs/adr/0001-initial-architecture.md)
 - Test with `npm test` or run full E2E locally with [`act`](https://github.com/nektos/act).
-
-PRs welcome! Please read our `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` (to be added).
-
----
-
-## License
-
-[ISC](./LICENSE)
 
 ---
 
