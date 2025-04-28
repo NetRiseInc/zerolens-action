@@ -96,23 +96,39 @@ let aiResults = {};
     }
 
     // CO-01: optional PR comment
-    if (inputs.commentPr && (process.env.GITHUB_EVENT_NAME || '').includes('pull_request')) {
+    if (inputs.commentPr) {
       const github = require('@actions/github');
       try {
         const octokit = github.getOctokit(ghToken);
         const { owner, repo } = github.context.repo;
-        const issue_number = github.context.payload.pull_request.number;
-        const { buildMarkdown } = require('./report/step-summary');
-        const body = buildMarkdown(policyOutcome.counts, findingsAgg.summary, inputs.ai);
-        // find existing comment by bot
-        const { data: comments } = await octokit.rest.issues.listComments({ owner, repo, issue_number });
-        const prev = comments.find((c) => c.user.type === 'Bot' && c.body.includes('ZeroLens Scan Summary'));
-        if (prev) {
-          await octokit.rest.issues.updateComment({ owner, repo, comment_id: prev.id, body });
+        let issue_number;
+
+        if (github.context.payload.pull_request) {
+          issue_number = github.context.payload.pull_request.number;
         } else {
-          await octokit.rest.issues.createComment({ owner, repo, issue_number, body });
+          // Fallback: find PRs associated with current commit (for push events)
+          const sha = github.context.sha;
+          const prs = await octokit.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: sha });
+          if (prs.data && prs.data.length) {
+            issue_number = prs.data[0].number;
+          }
         }
-        console.log('[ZeroLens] PR comment posted/updated');
+
+        if (!issue_number) {
+          console.log('[ZeroLens] No pull request found for commit; skipping comment.');
+        } else {
+          const { buildMarkdown } = require('./report/step-summary');
+          const body = buildMarkdown(policyOutcome.counts, findingsAgg.summary, inputs.ai);
+          // find existing comment by bot
+          const { data: comments } = await octokit.rest.issues.listComments({ owner, repo, issue_number });
+          const prev = comments.find((c) => c.user.type === 'Bot' && c.body.includes('ZeroLens Scan Summary'));
+          if (prev) {
+            await octokit.rest.issues.updateComment({ owner, repo, comment_id: prev.id, body });
+          } else {
+            await octokit.rest.issues.createComment({ owner, repo, issue_number, body });
+          }
+          console.log('[ZeroLens] PR comment posted/updated');
+        }
       } catch (err) {
         console.warn('[ZeroLens] Failed to post PR comment:', err.message);
       }
