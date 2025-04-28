@@ -227,7 +227,6 @@ See [`examples/`](./examples/) for more scenarios:
 
 - [Requirements & Design](./requirements.md)
 - [Architectural ADR](./docs/adr/0001-initial-architecture.md)
-- [OpenAPI specification](./openapi.yaml)
 - Test with `npm test` or run full E2E locally with [`act`](https://github.com/nektos/act).
 
 PRs welcome! Please read our `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` (to be added).
@@ -242,4 +241,4 @@ PRs welcome! Please read our `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` (to be a
 
 ## Support
 
-Contact [NetRise](https://zerolens.netrise.io) or email support (see API docs) for help or API token requests.
+Contact [NetRise](https://www.netrise.io) or email support (see API docs) for help or API token requests.
