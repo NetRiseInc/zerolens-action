@@ -64,6 +64,9 @@ inputs:
   sarif_path:
     description: 'If set, also emit findings in SARIF format to this path'
     required: false
+  github_token:
+    description: 'GitHub token used for PR comments (defaults to GITHUB_TOKEN env)'
+    required: false
 
 outputs:
   hashes:

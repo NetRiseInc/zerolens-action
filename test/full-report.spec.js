@@ -26,9 +26,10 @@ describe('full report generator', () => {
         },
       },
     };
-    const md = buildReport(findingsAgg, aiResults, ['hash'], { blocking: 0, warnings: 0 });
+    const md = buildReport(findingsAgg, aiResults, ['hash'], { blocking: 0, warnings: 0 }, true);
     expect(md).toMatch(/CWE-121/);
     expect(md).toMatch(/memcpy/);
     expect(md).toMatch(/AI Analysis/);
+    expect(md).toMatch(/NetRise ZeroLens Security Report/);
   });
 }); 

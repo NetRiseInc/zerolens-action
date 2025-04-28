@@ -1,8 +1,3 @@
-/**
- * NetRise ZeroLens GitHub Action – entrypoint (placeholder)
- * Real logic will be implemented in subsequent tasks.
- */
-
 const { getInputs } = require('./utils/input.js');
 const { hashFiles } = require('./utils/hash');
 const { uploadBinary, pollUntilCompleted } = require('./api/client');
@@ -64,11 +59,13 @@ let aiResults = {};
       const { getAIForHashes } = require('./api/client');
       aiResults = await getAIForHashes(hashList, inputs.token);
       console.log('AI analysis retrieved for', Object.keys(aiResults).length, 'binaries');
-      const { buildReport, writeFullReport } = require('./report/full-report');
-      const md = buildReport(findingsAgg, aiResults, hashList, policyOutcome.counts);
-      writeFullReport(inputs.reportPath, md);
-      console.log('Report written to', inputs.reportPath);
     }
+
+    // Always build full report (AI section may be placeholder)
+    const { buildReport, writeFullReport } = require('./report/full-report');
+    const fullMd = buildReport(findingsAgg, aiResults, hashList, policyOutcome.counts, inputs.ai);
+    writeFullReport(inputs.reportPath, fullMd);
+    console.log('Report written to', inputs.reportPath);
 
     // RP-04: SARIF emitter
     if (inputs.sarifPath) {
@@ -79,7 +76,7 @@ let aiResults = {};
     }
 
     // RP-05: set action outputs
-    const core = require('@actions/core');
+    const ghToken = inputs.ghToken || inputs.token; // fallback
     const outputs = {
       hashes: JSON.stringify(hashList),
       findings_json: JSON.stringify(findingsAgg.binaries),
@@ -99,6 +96,45 @@ let aiResults = {};
     } else if (exitCode === 78) {
       console.log('[ZeroLens] Policy warnings – neutral exit (78)');
     }
+
+    // CO-01: optional PR comment
+    if (inputs.commentPr) {
+      const github = require('@actions/github');
+      try {
+        const octokit = github.getOctokit(ghToken);
+        const { owner, repo } = github.context.repo;
+        let issue_number;
+
+        if (github.context.payload.pull_request) {
+          issue_number = github.context.payload.pull_request.number;
+        } else {
+          // Fallback: find PRs associated with current commit (for push events)
+          const sha = github.context.sha;
+          const prs = await octokit.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: sha });
+          if (prs.data && prs.data.length) {
+            issue_number = prs.data[0].number;
+          }
+        }
+
+        if (!issue_number) {
+          console.log('[ZeroLens] No pull request found for commit; skipping comment.');
+        } else {
+          const body = fullMd;
+          // find existing comment by bot
+          const { data: comments } = await octokit.rest.issues.listComments({ owner, repo, issue_number });
+          const prev = comments.find((c) => c.user.type === 'Bot' && c.body.includes('ZeroLens Scan Summary'));
+          if (prev) {
+            await octokit.rest.issues.updateComment({ owner, repo, comment_id: prev.id, body });
+          } else {
+            await octokit.rest.issues.createComment({ owner, repo, issue_number, body });
+          }
+          console.log('[ZeroLens] PR comment posted/updated');
+        }
+      } catch (err) {
+        console.warn('[ZeroLens] Failed to post PR comment:', err.message);
+      }
+    }
+
     // Exit with explicit code so act/github interprets correctly
     process.exit(exitCode);
   }

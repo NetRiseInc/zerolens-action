@@ -9,6 +9,10 @@ on:
 
 jobs:
   dummy_scan:
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +42,8 @@ jobs:
           ai_analysis: true
           sarif_path: out/dummy.sarif
           wait: true
+          comment_pr: true
+          github_token: ${{ github.token }}
 
       # 4. Validate **every** output exists & is non-empty
       - name: Assert outputs

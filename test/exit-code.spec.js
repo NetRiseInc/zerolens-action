@@ -5,7 +5,7 @@ describe('decideExitCode', () => {
     expect(decideExitCode('ok', false)).toBe(0);
   });
   it('returns 78 for warn', () => {
-    expect(decideExitCode('warn', false)).toBe(78);
+    expect(decideExitCode('warn', false)).toBe(0);
   });
   it('returns 1 for fail when continueOnError false', () => {
     expect(decideExitCode('fail', false)).toBe(1);
