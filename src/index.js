@@ -74,7 +74,7 @@ let aiResults = {};
     }
 
     // RP-05: set action outputs
-    const core = require('@actions/core');
+    const ghToken = inputs.ghToken || inputs.token; // fallback
     const outputs = {
       hashes: JSON.stringify(hashList),
       findings_json: JSON.stringify(findingsAgg.binaries),
@@ -96,11 +96,10 @@ let aiResults = {};
     }
 
     // CO-01: optional PR comment
-    if (inputs.commentPr && process.env.GITHUB_EVENT_NAME === 'pull_request') {
+    if (inputs.commentPr && (process.env.GITHUB_EVENT_NAME || '').includes('pull_request')) {
       const github = require('@actions/github');
-      const core = require('@actions/core');
       try {
-        const octokit = github.getOctokit(core.getInput('token'));
+        const octokit = github.getOctokit(ghToken);
         const { owner, repo } = github.context.repo;
         const issue_number = github.context.payload.pull_request.number;
         const { buildMarkdown } = require('./report/step-summary');

@@ -68,6 +68,8 @@ function getInputs() {
     parseBool(core.getInput('comment_pr')) ??
     (flag('comment_pr') === true || flag('comment_pr') === 'true' ? true : false);
 
+  const ghToken = core.getInput('github_token') || process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+
   const paths = fg.sync(tBinary);
   if (paths.length === 0) {
     core.setFailed(`No files matched pattern: ${tBinary}`);
@@ -96,6 +98,7 @@ function getInputs() {
     maxFindings,
     continueOnError,
     commentPr,
+    ghToken,
   };
 }
 

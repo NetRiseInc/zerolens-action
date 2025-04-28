@@ -39,6 +39,7 @@ jobs:
           sarif_path: out/dummy.sarif
           wait: true
           comment_pr: true
+          github_token: ${{ github.token }}
 
       # 4. Validate **every** output exists & is non-empty
       - name: Assert outputs
