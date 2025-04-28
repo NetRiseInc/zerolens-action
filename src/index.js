@@ -59,11 +59,13 @@ let aiResults = {};
       const { getAIForHashes } = require('./api/client');
       aiResults = await getAIForHashes(hashList, inputs.token);
       console.log('AI analysis retrieved for', Object.keys(aiResults).length, 'binaries');
-      const { buildReport, writeFullReport } = require('./report/full-report');
-      const md = buildReport(findingsAgg, aiResults, hashList, policyOutcome.counts, inputs.ai);
-      writeFullReport(inputs.reportPath, md);
-      console.log('Report written to', inputs.reportPath);
     }
+
+    // Always build full report (AI section may be placeholder)
+    const { buildReport, writeFullReport } = require('./report/full-report');
+    const fullMd = buildReport(findingsAgg, aiResults, hashList, policyOutcome.counts, inputs.ai);
+    writeFullReport(inputs.reportPath, fullMd);
+    console.log('Report written to', inputs.reportPath);
 
     // RP-04: SARIF emitter
     if (inputs.sarifPath) {
@@ -117,8 +119,7 @@ let aiResults = {};
         if (!issue_number) {
           console.log('[ZeroLens] No pull request found for commit; skipping comment.');
         } else {
-          const { buildMarkdown } = require('./report/step-summary');
-          const body = buildMarkdown(policyOutcome.counts, findingsAgg.summary, inputs.ai);
+          const body = fullMd;
           // find existing comment by bot
           const { data: comments } = await octokit.rest.issues.listComments({ owner, repo, issue_number });
           const prev = comments.find((c) => c.user.type === 'Bot' && c.body.includes('ZeroLens Scan Summary'));
