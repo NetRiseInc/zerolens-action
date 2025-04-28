@@ -38,6 +38,7 @@ jobs:
           ai_analysis: true
           sarif_path: out/dummy.sarif
           wait: true
+          comment_pr: true
 
       # 4. Validate **every** output exists & is non-empty
       - name: Assert outputs
