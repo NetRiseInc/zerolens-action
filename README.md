@@ -177,7 +177,7 @@ You always get at-a-glance, readable results, plus artefacts for audits or secur
 
 ## Code Scanning Integration (SARIF)
 
-To enable GitHub’s [Security tab](https://docs.github.com/en/code-security/code-scanning) alerts:
+To enable GitHub's [Security tab](https://docs.github.com/en/code-security/code-scanning) alerts:
 
 ```yaml
 - name: ZeroLens Scan
@@ -218,6 +218,7 @@ See [`examples/`](./examples/) for more scenarios:
 
 - [Quick scan workflow](./examples/quick-scan.yml)
 - [PR gate with policy & PR comment](./examples/pr-gate.yml)
+- [Code scanning integration (SARIF)](./examples/code-scanning.yml)
 
 ---
 
