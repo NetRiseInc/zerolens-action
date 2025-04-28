@@ -2,7 +2,6 @@
 
 [![CI Status](https://github.com/netriseinc/zerolens-action/workflows/CI/badge.svg)](https://github.com/netriseinc/zerolens-action/actions)
 [![Marketplace](https://img.shields.io/badge/GitHub%20Actions-Marketplace-blue?logo=github-actions&logoColor=white)](https://github.com/marketplace/actions/netrise-zerolens-scan)
-[![License](https://img.shields.io/github/license/netriseinc/zerolens-action)](LICENSE)
 
 > **Security scanning for compiled binaries, with one-line setup, Markdown and SARIF reporting, and PR integration.**
 
