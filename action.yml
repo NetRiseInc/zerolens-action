@@ -1,5 +1,5 @@
 name: 'NetRise ZeroLens Scan'
-description: 'ZeroLens scans your compiled binaries for CWE risks, uploads them to the NetRise API, waits for analysis, and emits Markdown & SARIF reports that can fail or warn your build based on policy.'
+description: 'Scans binaries for CWE risks, uploads them to the ZeroLens API, and emits reports that fail/warn your build based on policy.'
 author: 'NetRise'
 branding:
   icon: 'shield'
